@@ -36,5 +36,15 @@ jobs:
 
       - name: Format Go Code
         run: go fmt ./... && test -z $(go fmt ./...)
+
       - name: Install staticcheck
-        run: go install honnef.co/go/tools/cmd/staticcheck@latest && staticcheck ./...
+        run: go install honnef.co/go/tools/cmd/staticcheck@latest
+
+      - name: Exect staticcheck
+        run: staticcheck ./...
+
+      - name: Install Gosec
+        run: go install install github.com/securego/gosec/v2/cmd/gosec@latest
+
+      - name: Exec gosec
+        run: gosec ./...
