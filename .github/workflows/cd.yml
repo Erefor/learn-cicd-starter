@@ -11,23 +11,26 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4
 
       - name: Set Up Go
-        uses: actions/setup-go@v6
-
-      - name: Build new app version
-        run: sh ./scripts/buildprod.sh
-
-      - uses: "google-github-actions/auth@v2"
+        uses: actions/setup-go@v5
         with:
+          go-version: "1.22"
+
+      - name: Authenticate to Google Cloud
+        id: auth
+        uses: google-github-actions/auth@v2
+        with:
+          token_format: "access_token"
           credentials_json: "${{ secrets.GCP_CREDENTIALS }}"
 
-      - name: "Set up Cloud SDK"
-        uses: "google-github-actions/setup-gcloud@v3"
+      - name: Login to Artifact Registry
+        uses: docker/login-action@v3
+        with:
+          registry: us-central1-docker.pkg.dev
+          username: oauth2accesstoken
+          password: ${{ steps.auth.outputs.access_token }}
 
-      - name: Set up Cloud SDK
-        uses: google-github-actions/setup-gcloud@v2
-
-      - name: Build and Push image with Cloud Build
-        run: gcloud builds submit --tag us-central1-docker.pkg.dev/notely-506600/notely-ar-repo/notely:latest .
+      - name: Build and Push with Script
+        run: sh ./scripts/buildprod.sh
